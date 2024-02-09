@@ -40,7 +40,7 @@ const App = () => {
     setVotes(copyOfVotes);
   }
 
-  function anecdoteWithMostVotes() {
+  function getAnecdoteWithMostVotes() {
     const indexOfAnecdoteWithMostVotes = votes.indexOf(Math.max(...votes));
     return anecdotes[indexOfAnecdoteWithMostVotes];
   }
@@ -63,7 +63,7 @@ const App = () => {
         <button onClick={selectRandomAnecdote}>Next anecdote</button>
         <button onClick={handleAnecdotesVotes}>Vote</button>
         <h2>Anecdote with most votes</h2>
-        <p>{anecdoteWithMostVotes()}</p>
+        <p>{getAnecdoteWithMostVotes()}</p>
       </div>
     </div>
   )
