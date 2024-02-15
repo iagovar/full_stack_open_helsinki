@@ -1,17 +1,17 @@
 export default function LiElement(props) {
     const keys = Object.keys(props)
 
-    let joinedValues = ""
+    let joinedValues = "";
 
     for (const key of keys) {
         if (key != 'id') {
-            joinedValues += String(props[key])
-            joinedValues += ' - '
+            joinedValues += String(props[key]);
+            joinedValues += ' - ';
         }
     }
 
     // Removing last ' - '
-    joinedValues = joinedValues.slice(0, joinedValues.length -4)
+    joinedValues = joinedValues.substring(0, joinedValues.length -3);
 
     return <li key={props.id}>{joinedValues}</li>;
 }

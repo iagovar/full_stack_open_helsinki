@@ -1,19 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import axios from 'axios'
 
 import Filter from './components/Filter';
 import FilteredList from './components/FilteredList';
 
 const App = () => {
-  const [persons, setPersons] = useState([
+  /* const [persons, setPersons] = useState([
     { name: 'Arto Hellas', number: '040-123456', id: 1 },
     { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
     { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
     { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ]);
+  ]); */
+
+  /* Fetching data from local json-server with axios
+     Check: https://www.w3schools.com/react/react_useeffect.asp */
+  const [persons, setPersons] = useState([])
+  console.log('Fetching Data');
+  useEffect(() => {
+    axios
+      .get('http://localhost:3000/persons')
+      .then(response => {
+        setPersons(response.data);
+        setLoading('');
+      })
+  }, []);
+  console.log('Data loaded: ' + persons.length);
 
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newFilter, setNewFilter] = useState('');
+  const [loading, setLoading] = useState('Loading..');
 
   function addPerson(event) {
     event.preventDefault();
@@ -53,6 +69,7 @@ const App = () => {
       <h2>Numbers</h2>
       <ol className="list-of-numbers">
         <FilteredList listOfObjects={persons} stringToSearch={newFilter} />
+        {loading}
       </ol>
     </div>
   )
