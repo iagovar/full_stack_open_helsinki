@@ -1,6 +1,6 @@
 import LiElement from "./LiElement";
 
-export default function FilteredList({listOfObjects, stringToSearch}) {
+export default function FilteredList({listOfObjects, stringToSearch, methods}) {
     const liElementsToReturn = []
 
     for (const entry of listOfObjects) {
@@ -10,7 +10,8 @@ export default function FilteredList({listOfObjects, stringToSearch}) {
         if (isStringContained) {
             liElementsToReturn.push(
                 //<li key={entry.id}>{entry.name} - {entry.number}</li>
-                <LiElement key={entry.id} {...entry} />
+                <div style={{display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '1em'}} key={entry.id}><LiElement key={entry.id} {...entry}/>
+                <button onClick={() => methods.deletePerson(entry.id)}>Delete</button></div>
             )
         }
     }

@@ -1,46 +1,46 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 
 import Filter from './components/Filter';
 import FilteredList from './components/FilteredList';
+import * as courseService from './services/courses';
 
 const App = () => {
-  /* const [persons, setPersons] = useState([
-    { name: 'Arto Hellas', number: '040-123456', id: 1 },
-    { name: 'Ada Lovelace', number: '39-44-5323523', id: 2 },
-    { name: 'Dan Abramov', number: '12-43-234345', id: 3 },
-    { name: 'Mary Poppendieck', number: '39-23-6423122', id: 4 }
-  ]); */
-
-  /* Fetching data from local json-server with axios
-     Check: https://www.w3schools.com/react/react_useeffect.asp */
   const [persons, setPersons] = useState([])
-  console.log('Fetching Data');
-  useEffect(() => {
-    axios
-      .get('http://localhost:3000/persons')
-      .then(response => {
-        setPersons(response.data);
-        setLoading('');
-      })
-  }, []);
-  console.log('Data loaded: ' + persons.length);
-
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
   const [newFilter, setNewFilter] = useState('');
   const [loading, setLoading] = useState('Loading..');
 
+  /* Fetching data from local json-server with axios
+     Check: https://www.w3schools.com/react/react_useeffect.asp 
+  
+  NOTA: Components are rendered twice in dev-strict mode, not in production, due to
+  some lenghty reasons: https://www.reddit.com/r/reactjs/comments/ugzopd/why_is_my_fetch_getting_called_twice/
+  */
+  useEffect(() => {
+    courseService.getAll().then(response => {
+      setPersons(response);
+      setLoading('');
+    })
+  }, []);
+
+
+
   function addPerson(event) {
     event.preventDefault();
-    
-    let newPersons = [...persons];
 
     // Alert if the name or phone already exists, and prevent updating list
-    const isNameIncluded = newPersons.some(element => element.name === newName);
-    const isPhoneIncluded = newPersons.some(element => element.number === newPhone);
+    const isNameIncluded = persons.some(element => element.name === newName);
+    const isPhoneIncluded = persons.some(element => element.number === newPhone);
     if (isNameIncluded && !isPhoneIncluded) {
-      alert(`Name ${newName} already exist!`);
+      const confirmation = confirm(`Name ${newName} already exist! Would you like to update phone to ${newPhone}?`);
+      if (!confirmation) {return}
+      const newPersonId = persons.find(element => element.name === newName).id;
+      courseService.update(newPersonId, {name: newName, number: newPhone}).then(() => {
+        courseService.getAll().then(response => {
+          setPersons(response);
+        })
+      });
       return
     } else if (!isNameIncluded && isPhoneIncluded) {
       alert(`Phone ${newPhone} already exist!`);
@@ -50,10 +50,33 @@ const App = () => {
       return        
     }
 
-    const lastId = newPersons[newPersons.length -1].id;
-    const newId = lastId +1;
-    newPersons.push({name: newName, id: newId, number: newPhone})
-    setPersons(newPersons)
+    //ID is handled by server
+    const newPerson = {name: newName, number: newPhone};
+
+    try {
+      setLoading('');
+      courseService.create(newPerson).then(() => {
+        courseService.getAll().then(response => {
+          setPersons(response);
+        })
+      });
+    } catch (error) {
+      loading(error);
+    }
+
+  }
+
+  function deletePerson(id) {
+    try {
+      setLoading('');
+      courseService.deleteEntry(id).then(() => {
+        courseService.getAll().then(response => {
+          setPersons(response);
+        })
+      });
+    } catch (error) {
+      loading(error);
+    }
   }
 
   return (
@@ -68,7 +91,7 @@ const App = () => {
       </form>
       <h2>Numbers</h2>
       <ol className="list-of-numbers">
-        <FilteredList listOfObjects={persons} stringToSearch={newFilter} />
+        <FilteredList listOfObjects={persons} stringToSearch={newFilter} methods={{deletePerson}} />
         {loading}
       </ol>
     </div>

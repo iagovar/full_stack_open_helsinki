@@ -1,5 +1,5 @@
 export default function LiElement(props) {
-    const keys = Object.keys(props)
+    const keys = Object.keys(props);
 
     let joinedValues = "";
 
