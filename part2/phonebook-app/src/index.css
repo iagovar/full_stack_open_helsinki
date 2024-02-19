@@ -54,6 +54,26 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.notification {
+  color: black;
+  background: lightgoldenrodyellow;
+  padding: 1em;
+  border: 1px solid yellow;
+}
+
+.notification.error {
+  color: darkred;
+  background: lightpink;
+  border: 1px solid red;
+}
+
+.notification.success {
+  color: darkgreen;
+  background: lightgreen;
+  border: 1px solid green;
+}
+
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

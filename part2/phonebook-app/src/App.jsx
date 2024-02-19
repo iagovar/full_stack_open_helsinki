@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 
 import Filter from './components/Filter';
 import FilteredList from './components/FilteredList';
+import Notification from './components/Notification';
 import * as courseService from './services/courses';
 
 const App = () => {
@@ -10,6 +11,7 @@ const App = () => {
   const [newPhone, setNewPhone] = useState('');
   const [newFilter, setNewFilter] = useState('');
   const [loading, setLoading] = useState('Loading..');
+  const [notification, setNotification] = useState({message: null, type: null, time: null});
 
   /* Fetching data from local json-server with axios
      Check: https://www.w3schools.com/react/react_useeffect.asp 
@@ -60,27 +62,29 @@ const App = () => {
           setPersons(response);
         })
       });
+      setNotification({message: "Added " + newName, type: "success", time: 1000});
     } catch (error) {
-      loading(error);
+      // Show error for 1 sec
+      setNotification({message: error, type:"error", time:1000});
     }
 
   }
 
-  function deletePerson(id) {
+  async function deletePerson(id) {
     try {
       setLoading('');
-      courseService.deleteEntry(id).then(() => {
-        courseService.getAll().then(response => {
-          setPersons(response);
-        })
-      });
+      await courseService.deleteEntry(id);
+      const response = await courseService.getAll();
+      setPersons(response);
+      setNotification({message: "Removed " + persons.find(element => element.id === id).name + " from list", type: "error", time: 1000});
     } catch (error) {
-      loading(error);
+      setNotification({message:"Can't remove " + persons.find(element => element.id === id).name + " from list, already done?", type:"error", time:1000});
     }
   }
 
   return (
     <div>
+      <Notification message={notification.message} type={notification.type} />
       <h2>Phonebook</h2>
       <Filter className='filter' newFilter={newFilter} setNewFilter={setNewFilter} />
       <h2>AddNew</h2>

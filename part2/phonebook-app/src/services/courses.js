@@ -38,12 +38,7 @@ export async function update(id, newObject) {
 }
 
 export async function deleteEntry(id) {
-    try {
-        console.log('Deleting data...');
-        const response = await axios.delete(`${baseUrl}/${id}`);
-        return response.data;
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
+    console.log('Deleting data...');
+    const response = await axios.delete(`${baseUrl}/${id}`);
+    return response.data;
 }
