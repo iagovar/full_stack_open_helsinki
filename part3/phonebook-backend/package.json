@@ -4,14 +4,15 @@
   "description": "Phonebook backend starting on exercise 3.1",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "testPhoneBookPart3": "echo \"Error: no test specified\" && exit 1",
+    "startPhoneBookPart3": "node index.js",
+    "devPhoneBookPart3": "nodemon index.js"
   },
   "author": "Iagovar",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.18.3"
+    "express": "^4.18.3",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
