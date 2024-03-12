@@ -1,24 +1,26 @@
 const express = require('express');
 const { requestLogger, unknownEndpoint } = require('./someMiddleware');
 const morgan = require('morgan');
+const cors = require('cors');
+
 
 const app = express();
-const PORT = 3001;
-
 
 let personsArray = require('./tlfs.json');
 
-morgan.token('jsonContent', function (req, res) { return JSON.stringify(req.body) })
-
+app.use(cors());
 // We have to use this middleware as the request.body comes as a stream in the request, this middleware saves us the work of reading, storing and interpreting the stream.
 app.use(express.json());
 //app.use(requestLogger);
 //app.use(unknownEndpoint);
+morgan.token('jsonContent', function (req, res) { return JSON.stringify(req.body) })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :jsonContent'));
 
+// Will try to match any get request against files in this directory
+app.use(express.static('../phonebook-frontend/dist'))
 
 app.get('/', (request, response) => {
-    response.send('<div>Something</div>')
+    response.send('<div>Phonebook backend</div>')
 })
 
 app.get('/info', (request, response) => {
@@ -75,8 +77,8 @@ app.post('/api/test', (request, response) => {
 
 
 
-
-
+// Listening
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
 console.log(`Server running on port ${PORT}`)
 })
