@@ -17,7 +17,7 @@ morgan.token('jsonContent', function (req, res) { return JSON.stringify(req.body
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :jsonContent'));
 
 // Will try to match any get request against files in this directory
-app.use(express.static('../phonebook-frontend/dist'))
+app.use(express.static('./dist'))
 
 app.get('/', (request, response) => {
     response.send('<div>Phonebook backend</div>')
