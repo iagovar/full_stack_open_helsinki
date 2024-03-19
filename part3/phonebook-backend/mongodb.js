@@ -37,12 +37,21 @@ async function insertOneEntry({collectionName = dbCredentials.collectionName, en
     return await mongoose.connection.db.collection(collectionName).insertOne(entry);
 }
 
+async function updateOneEntry({collectionName = dbCredentials.collectionName, id, entry}) {
+    // IDs in MongoDB are objects so we need to convert the id string into an object
+    // This method is deprecated but mongoose provides no alternative to transform a string into an object id...
+    const thisId = new mongoose.Types.ObjectId(id);
+    return await mongoose.connection.db.collection(collectionName).updateOne({ _id: thisId }, { $set: entry });
+}
+
 async function checkIfNameExists({collectionName = dbCredentials.collectionName, name}) {
-    const count = await mongoose.connection.db.collection(collectionName).findOne({ name: name });
-    if (count != null) {
-        return true;
+    
+    const document = await mongoose.connection.db.collection(collectionName).findOne({ name: name });
+
+    if (document != null) {
+        return {doesExist: true, id: document._id};
     } else {
-        return false;
+        return {doesExist: false};
     }
 }
 
@@ -53,5 +62,6 @@ module.exports = {
     getOneEntry,
     deleteOneEntry,
     insertOneEntry,
+    updateOneEntry,
     checkIfNameExists
 }

@@ -1,5 +1,5 @@
 const express = require('express');
-const { requestLogger, unknownEndpoint } = require('./someMiddleware');
+const { requestLogger, unknownEndpoint, errorHandler } = require('./someMiddleware');
 const morgan = require('morgan');
 const cors = require('cors');
 const mongodb = require('./mongodb.js');
@@ -22,12 +22,14 @@ app.use(cors());
 // We have to use this middleware as the request.body comes as a stream in the request, this middleware saves us the work of reading, storing and interpreting the stream.
 app.use(express.json());
 //app.use(requestLogger);
-//app.use(unknownEndpoint);
+app.use(unknownEndpoint);
 morgan.token('jsonContent', function (req, res) { return JSON.stringify(req.body) })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :jsonContent'));
 
 // Will try to match any get request against files in this directory
 app.use(express.static('./dist'))
+
+app.use(errorHandler);
 
 
 
@@ -117,10 +119,11 @@ app.post('/api/persons', (request, response) => {
         })
     }
 
-    const doesNameExist = mongodb.checkIfNameExists(person.name)
+    mongodb.checkIfNameExists(person.name)
     .then(result => {
-        if (result) {
-            response.status(400).json({error: 'Name already exists, please use a different name'});
+        if (result.doesExist) {
+            //response.status(400).json({error: 'Name already exists, please use a different name'});
+            mongodb.updateOneEntry({id: result.id, entry: person})
         } else {
             mongodb.insertOneEntry({entry: person})
             .then(() => {
@@ -134,6 +137,25 @@ app.post('/api/persons', (request, response) => {
 
 })
 
+app.put('/api/persons/:id', (request, response) => {
+    const person = request.body;
+    const id = request.params.id;
+
+    if (!person.name || !person.number) {
+        response.status(400).json({
+            error: 'You must provide Name AND Number'
+        })
+    }
+
+    mongodb.updateOneEntry({id: id, entry: person})
+    .then(() => {
+        response.status(200).json(person);
+    })
+    .catch(error => {
+        response.status(400).json({ "error": error });
+    })
+})
+
 app.post('/api/test', (request, response) => {
     // Using express.json() middleware
     console.log(request.body);
@@ -142,7 +164,9 @@ app.post('/api/test', (request, response) => {
 
 
 
-// Listening
+/* ==================================================
+                    Listening
+===================================================*/
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
 console.log(`Server running on port ${PORT}`)
