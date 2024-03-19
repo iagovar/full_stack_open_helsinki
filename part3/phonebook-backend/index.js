@@ -15,28 +15,29 @@ mongodb.connectToMongoDB().then(reply => {
 })
 
 /* ==================================================
-                    Middleware
+Global Middleware (Executed before handling requests)
 ===================================================*/
 
 app.use(cors());
+
 // We have to use this middleware as the request.body comes as a stream in the request, this middleware saves us the work of reading, storing and interpreting the stream.
 app.use(express.json());
+
 //app.use(requestLogger);
-app.use(unknownEndpoint);
+
+// Morgan output appears in terminal, but not debug console
 morgan.token('jsonContent', function (req, res) { return JSON.stringify(req.body) })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :jsonContent'));
 
 // Will try to match any get request against files in this directory
 app.use(express.static('./dist'))
 
-app.use(errorHandler);
 
 
 
 /* ==================================================
                     Routing
 ===================================================*/
-
 
 app.get('/info', (request, response) => {
 
@@ -162,7 +163,12 @@ app.post('/api/test', (request, response) => {
     response.json(request.body);
 })
 
+/* ==================================================
+            Error Handling Middleware                  
+===================================================*/
 
+app.use(unknownEndpoint);
+app.use(errorHandler);
 
 /* ==================================================
                     Listening
