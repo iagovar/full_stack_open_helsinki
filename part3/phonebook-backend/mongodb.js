@@ -1,10 +1,10 @@
-const mongoose = require('mongoose');
-const dbCredentials = require('./mongodb.config.json');
-const { response } = require('express');
+const mongoose = require("mongoose");
+const dbCredentials = require("./mongodb.config.json");
+const { response } = require("express");
 
 /**
  * Defining schema and validation for the telephone records.
- * 
+ *
  * I don't like Mongoose, but for the sake of FSO Course...
  */
 
@@ -24,24 +24,24 @@ const personSchema = new mongoose.Schema({
         }
 
     }
-})
+});
 
 function validatePhoneNumberFormat(phoneNumberAsString) {
 
     // Check if there is a hyphen
-    const hasHyphen = String(phoneNumberAsString).includes('-');
-    if (!hasHyphen) {return false}
+    const hasHyphen = String(phoneNumberAsString).includes("-");
+    if (!hasHyphen) {return false;}
 
     // Check if such hyphen is in the index 2 or 3
-    const hyphenIndex = String(phoneNumberAsString).indexOf('-');
-    if (hyphenIndex < 2 || hyphenIndex > 3) {return false}
+    const hyphenIndex = String(phoneNumberAsString).indexOf("-");
+    if (hyphenIndex < 2 || hyphenIndex > 3) {return false;}
 
     // Check if the rest of the string besides the hyphen are numbers
     let howManyStrings = 0; // (Can't be over 1)
     Array.from(phoneNumberAsString).forEach(element => {
-        if (isNaN(Number(element))) {howManyStrings += 1}
-    })
-    if (howManyStrings > 1) {return false}
+        if (isNaN(Number(element))) {howManyStrings += 1;}
+    });
+    if (howManyStrings > 1) {return false;}
 
     // If you reached up to here, everything is fine
     return true;
@@ -49,7 +49,7 @@ function validatePhoneNumberFormat(phoneNumberAsString) {
 }
 
 // Models are Mongoose classes that allow us to interact with MongoDB
-const Person = mongoose.model('Person', personSchema, dbCredentials.collectionName);
+const Person = mongoose.model("Person", personSchema, dbCredentials.collectionName);
 
 
 /**
@@ -59,7 +59,7 @@ const Person = mongoose.model('Person', personSchema, dbCredentials.collectionNa
 async function connectToMongoDB() {
     try {
         await mongoose.connect(`mongodb+srv://${dbCredentials.username}:${dbCredentials.password}@fsodb.jvq6uqb.mongodb.net/${dbCredentials.database}?retryWrites=true&w=majority&appName=fsodb`);
-        console.log('Connected to MongoDB');
+        console.log("Connected to MongoDB");
     } catch (error) {
         console.error(error);
         process.exit(1);
@@ -93,7 +93,7 @@ async function getAllEntries(collectionName = dbCredentials.collectionName) {
  * @param {string} id - The ID of the entry to retrieve
  * @return {Promise} A promise that resolves to the retrieved entry
  */
-async function getOneEntry({collectionName = dbCredentials.collectionName, id}) {
+async function getOneEntry({ collectionName = dbCredentials.collectionName, id }) {
     // IDs in MongoDB are objects so we need to convert the id string into an object
     // This method is deprecated but mongoose provides no alternative to transform a string into an object id...
     const thisId = new mongoose.Types.ObjectId(id);
@@ -107,7 +107,7 @@ async function getOneEntry({collectionName = dbCredentials.collectionName, id}) 
  * @param {string} id - The ID of the entry to be deleted
  * @return {Promise} A promise that resolves to the result of the deletion operation
  */
-async function deleteOneEntry({collectionName = dbCredentials.collectionName, id}) {
+async function deleteOneEntry({ collectionName = dbCredentials.collectionName, id }) {
     // IDs in MongoDB are objects so we need to convert the id string into an object
     // This method is deprecated but mongoose provides no alternative to transform a string into an object id...
     const thisId = new mongoose.Types.ObjectId(id);
@@ -121,10 +121,10 @@ async function deleteOneEntry({collectionName = dbCredentials.collectionName, id
  * @param {Object} entry - the entry to be inserted into the collection
  * @return {Promise} A promise that resolves with the result of the insertion operation
  */
-async function insertOneEntry({collectionName = dbCredentials.collectionName, entry}) {
+async function insertOneEntry({ collectionName = dbCredentials.collectionName, entry }) {
 
     const entryToInsert = new Person(entry);
-    
+
     console.log("Inserting entry: ", entryToInsert);
 
     try {
@@ -147,7 +147,7 @@ async function insertOneEntry({collectionName = dbCredentials.collectionName, en
  * @param {Object} options.entry - The updated entry object.
  * @return {Promise<Object>} A promise that resolves to the result of the update operation.
  */
-async function updateOneEntry({collectionName = dbCredentials.collectionName, id, entry}) {
+async function updateOneEntry({ collectionName = dbCredentials.collectionName, id, entry }) {
     // IDs in MongoDB are objects so we need to convert the id string into an object
     // This method is deprecated but mongoose provides no alternative to transform a string into an object id...
     const thisId = new mongoose.Types.ObjectId(id);
@@ -161,14 +161,14 @@ async function updateOneEntry({collectionName = dbCredentials.collectionName, id
  * @param {string} name - the name to check for existence
  * @return {Object} an object indicating if the name exists and its corresponding ID if found
  */
-async function checkIfNameExists({collectionName = dbCredentials.collectionName, name}) {
-    
+async function checkIfNameExists({ collectionName = dbCredentials.collectionName, name }) {
+
     const document = await mongoose.connection.db.collection(collectionName).findOne({ name: name });
 
     if (document != null) {
-        return {doesExist: true, id: document._id};
+        return { doesExist: true, id: document._id };
     } else {
-        return {doesExist: false};
+        return { doesExist: false };
     }
 }
 
@@ -181,4 +181,4 @@ module.exports = {
     insertOneEntry,
     updateOneEntry,
     checkIfNameExists
-}
+};
