@@ -1,5 +1,56 @@
 const mongoose = require('mongoose');
 const dbCredentials = require('./mongodb.config.json');
+const { response } = require('express');
+
+/**
+ * Defining schema and validation for the telephone records.
+ * 
+ * I don't like Mongoose, but for the sake of FSO Course...
+ */
+
+const personSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        minlength: 3,
+        required: true
+    },
+    number: {
+        type: String,
+        minlength: 9,
+        required: true,
+        validate: {
+            validator: validatePhoneNumberFormat,
+            message: props => `${props.value} needs to be on format 12-345678 or 123-45678`
+        }
+
+    }
+})
+
+function validatePhoneNumberFormat(phoneNumberAsString) {
+
+    // Check if there is a hyphen
+    const hasHyphen = String(phoneNumberAsString).includes('-');
+    if (!hasHyphen) {return false}
+
+    // Check if such hyphen is in the index 2 or 3
+    const hyphenIndex = String(phoneNumberAsString).indexOf('-');
+    if (hyphenIndex < 2 || hyphenIndex > 3) {return false}
+
+    // Check if the rest of the string besides the hyphen are numbers
+    let howManyStrings = 0; // (Can't be over 1)
+    Array.from(phoneNumberAsString).forEach(element => {
+        if (isNaN(Number(element))) {howManyStrings += 1}
+    })
+    if (howManyStrings > 1) {return false}
+
+    // If you reached up to here, everything is fine
+    return true;
+
+}
+
+// Models are Mongoose classes that allow us to interact with MongoDB
+const Person = mongoose.model('Person', personSchema, dbCredentials.collectionName);
+
 
 /**
  * Connects to MongoDB using the provided credentials.
@@ -71,7 +122,20 @@ async function deleteOneEntry({collectionName = dbCredentials.collectionName, id
  * @return {Promise} A promise that resolves with the result of the insertion operation
  */
 async function insertOneEntry({collectionName = dbCredentials.collectionName, entry}) {
-    return await mongoose.connection.db.collection(collectionName).insertOne(entry);
+
+    const entryToInsert = new Person(entry);
+    
+    console.log("Inserting entry: ", entryToInsert);
+
+    try {
+        const result = await entryToInsert.save();
+        console.log("Inserted entry: ", result);
+        return result;
+    } catch (error) {
+        throw error;
+    }
+
+    // return await mongoose.connection.db.collection(collectionName).insertOne(entry);
 }
 
 /**

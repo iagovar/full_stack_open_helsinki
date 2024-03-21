@@ -3,26 +3,30 @@ const baseUrl = '/api/persons'
 
 export async function getAll() {
     try {
-        console.log('Getting all data...');
+        console.log('\nGetting all data...');
         const response = await axios.get(baseUrl);
+        console.info("\nSuccessfully got all data:");
         console.log(response);
         return response.data;
     } catch (error) {
+        console.info("\nError getting all data:");
         console.error(error);
-        return [];
+        return error;
     }
 }
 
 
 export async function create(newObject) {
     try {
-        console.log('Creating new data...');
+        console.log('\nCreating new data...');
         const response = await axios.post(baseUrl, newObject);
+        console.info("\nSuccessfully created new data:");
         console.log(response);
         return response.data;
     } catch (error) {
+        console.info("\nError creating new data:");
         console.error(error);
-        return [];
+        throw error;
     }
 }
 

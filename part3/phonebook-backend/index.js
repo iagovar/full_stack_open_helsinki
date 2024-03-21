@@ -3,6 +3,7 @@ const { requestLogger, unknownEndpoint, errorHandler } = require('./someMiddlewa
 const morgan = require('morgan');
 const cors = require('cors');
 const mongodb = require('./mongodb.js');
+const { mongo } = require('mongoose');
 
 /* ==================================================
                     Setup
@@ -114,27 +115,35 @@ app.delete('/api/persons/:id', (request, response) => {
 app.post('/api/persons', (request, response) => {
     const person = request.body;
 
+    // Basic Validation
     if (!person.name || !person.number) {
         response.status(400).json({
             error: 'You must provide Name AND Number'
         })
     }
 
-    mongodb.checkIfNameExists(person.name)
-    .then(result => {
-        if (result.doesExist) {
-            //response.status(400).json({error: 'Name already exists, please use a different name'});
-            mongodb.updateOneEntry({id: result.id, entry: person})
-        } else {
-            mongodb.insertOneEntry({entry: person})
-            .then(() => {
-                response.json(person);
-            })
-            .catch(error => {
+    // Check if a name already exists. If it does, update it, if it doesn't, create it.
+    (async () => {
+        const checkPromise = await mongodb.checkIfNameExists({name: person.name});
+
+        if (checkPromise.doesExist == true) {
+            try {
+                const updatePromise = await mongodb.updateOneEntry({id: checkPromise.id, entry: person})
+                response.status(201).json(updatePromise);
+            } catch (error) {
                 response.status(400).json({ "error": error });
-            })
+            }
         }
-    })
+
+        if (checkPromise.doesExist == false) {
+            try {
+                const insertPromise = await mongodb.insertOneEntry({entry: person})
+                response.status(201).json(insertPromise);
+            } catch (error) {
+                response.status(400).json({ "error": error });
+            }
+        }
+    })();
 
 })
 

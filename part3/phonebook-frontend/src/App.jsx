@@ -13,7 +13,7 @@ const App = () => {
   const [loading, setLoading] = useState('Loading..');
   const [notification, setNotification] = useState({message: null, type: null, time: null});
 
-  /* Fetching data from local json-server with axios
+  /* 
      Check: https://www.w3schools.com/react/react_useeffect.asp 
   
   NOTA: Components are rendered twice in dev-strict mode, not in production, due to
@@ -31,12 +31,16 @@ const App = () => {
   function addPerson(event) {
     event.preventDefault();
 
-    // Alert if the name or phone already exists, and prevent updating list
+    // Check against local list if name and phone already exist
+    // If it does, offer confirmation to update the phone.
     const isNameIncluded = persons.some(element => element.name === newName);
     const isPhoneIncluded = persons.some(element => element.number === newPhone);
+
     if (isNameIncluded && !isPhoneIncluded) {
+
       const confirmation = confirm(`Name ${newName} already exist! Would you like to update phone to ${newPhone}?`);
       if (!confirmation) {return}
+
       const newPersonId = persons.find(element => element.name === newName).id;
       courseService.update(newPersonId, {name: newName, number: newPhone}).then(() => {
         courseService.getAll().then(response => {
@@ -44,30 +48,32 @@ const App = () => {
         })
       });
       return
+
     } else if (!isNameIncluded && isPhoneIncluded) {
       alert(`Phone ${newPhone} already exist!`);
-      return      
+      return 
     } else if (isNameIncluded && isPhoneIncluded) {
       alert(`Entry ${newName} with ${newPhone} already exist!`);
-      return        
+      return
     }
 
-    //ID is handled by server
+    // If it doesn't exist, add it without confirmation
+
     const newPerson = {name: newName, number: newPhone};
 
-    try {
+    (async () => {
       setLoading('');
-      courseService.create(newPerson).then(() => {
-        courseService.getAll().then(response => {
-          setPersons(response);
-        })
-      });
-      setNotification({message: "Added " + newName, type: "success", time: 1000});
-    } catch (error) {
-      // Show error for 1 sec
-      setNotification({message: error, type:"error", time:1000});
-    }
-
+      
+      try {
+        await courseService.create(newPerson);
+        const personsPromise = await courseService.getAll();
+        setPersons(personsPromise);
+        setNotification({message: "Added " + newName, type: "success", time: 1000});
+      } catch (error) {
+        setNotification({message: error.response.data.error.message, type:"error", time:1000});
+      }
+      
+    })();
   }
 
   async function deletePerson(id) {
