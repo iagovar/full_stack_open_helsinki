@@ -3,7 +3,6 @@ const { requestLogger, unknownEndpoint, errorHandler } = require("./someMiddlewa
 const morgan = require("morgan");
 const cors = require("cors");
 const mongodb = require("./mongodb.js");
-const { mongo } = require("mongoose");
 
 /* ==================================================
                     Setup
@@ -11,7 +10,7 @@ const { mongo } = require("mongoose");
 
 const app = express();
 
-mongodb.connectToMongoDB().then(reply => {
+mongodb.connectToMongoDB().then(() => {
     // Do nothing for now;
 });
 
@@ -126,7 +125,7 @@ app.post("/api/persons", (request, response) => {
     (async () => {
         const checkPromise = await mongodb.checkIfNameExists({ name: person.name });
 
-        if (checkPromise.doesExist == true) {
+        if (checkPromise.doesExist === true) {
             try {
                 const updatePromise = await mongodb.updateOneEntry({ id: checkPromise.id, entry: person });
                 response.status(201).json(updatePromise);
@@ -135,7 +134,7 @@ app.post("/api/persons", (request, response) => {
             }
         }
 
-        if (checkPromise.doesExist == false) {
+        if (checkPromise.doesExist === false) {
             try {
                 const insertPromise = await mongodb.insertOneEntry({ entry: person });
                 response.status(201).json(insertPromise);

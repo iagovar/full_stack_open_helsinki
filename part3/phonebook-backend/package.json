@@ -7,7 +7,7 @@
     "testPhoneBookPart3": "echo \"Error: no test specified\" && exit 1",
     "startPhoneBookPart3": "node index.js",
     "devPhoneBookPart3": "nodemon index.js",
-    "lintPhoneBookPart3": "eslint . "
+    "lintPhoneBookPart3": "npx eslint . "
   },
   "author": "Iagovar",
   "license": "ISC",

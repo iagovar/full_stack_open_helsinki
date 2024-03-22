@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const dbCredentials = require("./mongodb.config.json");
-const { response } = require("express");
 
 /**
  * Defining schema and validation for the telephone records.
@@ -127,13 +126,11 @@ async function insertOneEntry({ collectionName = dbCredentials.collectionName, e
 
     console.log("Inserting entry: ", entryToInsert);
 
-    try {
-        const result = await entryToInsert.save();
-        console.log("Inserted entry: ", result);
-        return result;
-    } catch (error) {
-        throw error;
-    }
+    // No need to use try/catch as it will be handled in index.js
+    const result = await entryToInsert.save();
+    console.log("Inserted entry: ", result);
+    return result;
+
 
     // return await mongoose.connection.db.collection(collectionName).insertOne(entry);
 }
@@ -165,7 +162,7 @@ async function checkIfNameExists({ collectionName = dbCredentials.collectionName
 
     const document = await mongoose.connection.db.collection(collectionName).findOne({ name: name });
 
-    if (document != null) {
+    if (document !== null) {
         return { doesExist: true, id: document._id };
     } else {
         return { doesExist: false };
