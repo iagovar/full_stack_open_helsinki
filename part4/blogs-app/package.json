@@ -1,0 +1,40 @@
+{
+  "name": "blog-repository",
+  "version": "1.0.0",
+  "description": "Blog repository for FSO",
+  "main": "index.js",
+  "scripts": {
+    "testBlogsPart4": "echo \"Error: no test specified\" && exit 1",
+    "startBlogsPart4": "node index.js",
+    "devBlogsPart4": "nodemon index.js",
+    "lintBlogsPart4": "npx eslint . "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iagovar/full_stack_open_helsinki.git"
+  },
+  "keywords": [
+    "blog",
+    "full",
+    "stack",
+    "open",
+    "helsinki"
+  ],
+  "author": "iagovar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iagovar/full_stack_open_helsinki/issues"
+  },
+  "homepage": "https://github.com/iagovar/full_stack_open_helsinki#readme",
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "nodemon": "^3.1.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.1",
+    "mongoose": "^8.2.3"
+  }
+}
