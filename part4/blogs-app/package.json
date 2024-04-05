@@ -4,10 +4,10 @@
   "description": "Blog repository for FSO",
   "main": "index.js",
   "scripts": {
-    "startBlogsPart4": "node index.js",
-    "devBlogsPart4": "nodemon index.js",
+    "startBlogsPart4": "NODE_ENV=production node index.js",
+    "devBlogsPart4": "NODE_ENV=development nodemon index.js",
     "lintBlogsPart4": "npx eslint . ",
-    "testBlogsPart4": "jest --verbose"
+    "testBlogsPart4": "NODE_ENV=test jest --verbose  --runInBand"
   },
   "repository": {
     "type": "git",
@@ -27,14 +27,17 @@
   },
   "homepage": "https://github.com/iagovar/full_stack_open_helsinki#readme",
   "devDependencies": {
+    "@types/jest": "^29.5.12",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",
     "jest": "^29.7.0",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "supertest": "^6.3.4"
   },
   "dependencies": {
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.19.1",
     "mongoose": "^8.2.3"
   },

@@ -6,6 +6,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const logger = require("./utils/logger");
+const config = require("./utils/config");
 
 /**
  * Load local middleware
@@ -15,20 +16,13 @@ const logger = require("./utils/logger");
 const blogsRouter = require("./controllers/blogsRouter");
 
 /**
- * Load config files
- */
-
-const mongoConfig = require("./config/mongodb.config.json");
-
-/**
  * Initialize app & set up middleware
  */
 
 try {
-    const mongoUrl = `mongodb+srv://${mongoConfig.username}:${mongoConfig.password}@${mongoConfig.host}/${mongoConfig.database}?retryWrites=true&w=majority`;
     (async () => {
         logger.info("Connecting to MongoDB");
-        await mongoose.connect(mongoUrl);
+        await mongoose.connect(config.MONGODB_URI);
         logger.info("Connected to MongoDB");
     })();
 } catch (error) {
