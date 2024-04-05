@@ -10,7 +10,7 @@
 
 This testing lines provides an environment variable "test", and the option `--runInBand` forces the test to run sequentially instead of in parallel.
 
-``"testBlogsPart4": "NODE_ENV=test jest --verbose  --runInBand"``
+`"testBlogsPart4": "NODE_ENV=test jest --verbose  --runInBand"`
 
 
 

@@ -26,9 +26,19 @@ blogsRouter.post("/api/blogs", async (request, response) => {
     }
 });
 
+blogsRouter.post("/api/blogs/:id", async (request, response) => {
+    try {
+        // new: true returns the updated document
+        const result = await Blog.findByIdAndUpdate(request.params.id, request.body, { new: true });
+        response.status(200).json(result);
+    } catch (error) {
+        response.status(400).json({ error: error.message });
+    }
+});
+
 blogsRouter.delete("/api/blogs/:id", async (request, response) => {
     try {
-        await Blog.findByIdAndRemove(request.params.id);
+        await Blog.findByIdAndDelete(request.params.id);
         response.status(204).end();
     } catch (error) {
         response.status(400).json({ error: error.message });
