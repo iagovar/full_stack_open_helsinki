@@ -47,6 +47,6 @@ const blogs = [
         likes: 2,
         __v: 0
     }  
-  ];
+];
 
 module.exports = {blogs};

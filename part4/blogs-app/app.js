@@ -14,6 +14,7 @@ const config = require("./utils/config");
 
 // Router
 const blogsRouter = require("./controllers/blogsRouter");
+const usersRouter = require("./controllers/usersRouter");
 
 /**
  * Initialize app & set up middleware
@@ -36,6 +37,8 @@ const app = express();
 app.use(cors());
 app.use(express.static("view"));
 app.use(express.json());
+app.use(usersRouter);
 app.use(blogsRouter);
+
 
 module.exports = app;
