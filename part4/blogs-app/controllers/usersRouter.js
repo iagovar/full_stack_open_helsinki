@@ -2,6 +2,16 @@ const usersRouter = require("express").Router();
 const UserModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
 
+usersRouter.get("/api/users/", async (request, response) => {
+    try {
+        // Returns ussers with blogs. This is no join, logic is embedded in models and routers.
+        const users = await UserModel.find({}).populate("blogs", { title: 1, author: 1, url: 1, likes: 1 });
+        response.status(200).json(users);        
+    } catch (error) {
+        response.status(400).json({ error: error.message });
+    }
+});
+
 usersRouter.get("/api/users/:id", async (request, response) => {
     try {
         const users = await UserModel.findById(request.params.id).populate("blogs");

@@ -11,10 +11,12 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    blogs: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Blog"
-    }
+    blogs: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Blog"
+        }
+    ]
 });
 
 
@@ -31,10 +33,10 @@ userSchema.set("toJSON", {
 const User = mongoose.model("User", userSchema);
 
 // Prevents duplicates, see https://mongoosejs.com/docs/faq.html#unique-doesnt-work
-/*
+
 (async () => {
     await User.init();
 })();
-*/
+
 
 module.exports = User;

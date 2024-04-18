@@ -4,8 +4,7 @@ const app = require("../app");
 const UserModel = require("../models/userModel");
 const api = supertest(app);
 
-const initialUsers = require("./userList");
-const initialBlogs = require("./blogList");
+const initialUsers = require("./userList").users;
 
 beforeEach(async () => {
     await UserModel.deleteMany({});
@@ -36,10 +35,6 @@ describe("Testing adding and retrieving users", () => {
             .send(newUser)
             .expect(400)
             .expect("Content-Type", /application\/json/);
-    });
-
-    test("Users include blogs they created", async () => {
-
     });
 
 });

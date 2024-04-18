@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const supertest = require("supertest");
 const app = require("../app");
 const Blog = require("../models/blogModel");
+const User = require("../models/userModel");
 const api = supertest(app);
 
 
@@ -15,13 +16,30 @@ const api = supertest(app);
  */
 
 const initialBlogs = require("./blogList").blogs;
+const initialUsers = require("./userList").users;
+const mergedList = initialBlogs.map(blog => {
+    const randomIndex = Math.floor(Math.random() * initialUsers.length);
+    blog.user = initialUsers[randomIndex];
+    return blog;
+});
 
 // Runs before each test: https://jestjs.io/es-ES/docs/api#beforeeachfn-tiempo
 beforeEach(async () => {
     await Blog.deleteMany({});
-    let blogObjects = initialBlogs.map(blog => new Blog(blog));
-    let promiseArray = blogObjects.map(blog => blog.save());
-    await Promise.all(promiseArray);
+    await User.deleteMany({});
+
+    let userObjects = initialUsers.map(user => new User(user));
+    let userPromiseArray = userObjects.map(user => user.save());
+    await Promise.all(userPromiseArray);
+
+    
+    const adminUserId = userObjects[0].id;
+    let blogObjects = mergedList.map(blog => {
+        blog.user = adminUserId;
+        return new Blog(blog);
+    });
+    let BlogPromiseArray = blogObjects.map(blog => blog.save());
+    await Promise.all(BlogPromiseArray);
 });
 
 describe("Testing adding and retrieving blogs", () => {
@@ -46,13 +64,19 @@ describe("Testing adding and retrieving blogs", () => {
     });
     
     test("A valid blog can be added", async () => {
+
+        const adminUserId = await User.findOne({ username: "admin" }).id;
+
         const newBlog = {
             title: "Iagovar Blog",
             author: "Iago Var",
             url: "https://iagovar.com/",
-            likes: 7
+            likes: 7,
+            user: adminUserId
         };
     
+        console.log(userObjects);
+
         await api
             .post("/api/blogs")
             .send(newBlog)
@@ -69,7 +93,8 @@ describe("Testing adding and retrieving blogs", () => {
     test("Blog without URL is not added", async () => {
         const newBlog = {
             author: "Iago Var 2",
-            likes: 7
+            likes: 7,
+            user: initialUsers[0].id
         };
     
         await api
@@ -86,7 +111,8 @@ describe("Testing adding and retrieving blogs", () => {
         const newBlog = {
             title: "No likes blog",
             author: "Iago Var",
-            url: "https://iagovar.com/"
+            url: "https://iagovar.com/",
+            user: initialUsers[0].id
         };
     
         await api
