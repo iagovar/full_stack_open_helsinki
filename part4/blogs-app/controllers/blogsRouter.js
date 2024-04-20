@@ -4,6 +4,7 @@ const User = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 
 // Some token utils
+/*
 function getTokenFrom(request) {
     // Defined as middleware in utils, this is just legacy code
     const authorization = request.get("authorization");
@@ -22,7 +23,7 @@ function getUserFromToken(token) {
     }
     return decodedToken.id;
 }
-
+*/
 
 blogsRouter.get("/", (request, response) => {
     response.send("Server Running");

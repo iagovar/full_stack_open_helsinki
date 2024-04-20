@@ -4,6 +4,7 @@ const app = require("../app");
 const Blog = require("../models/blogModel");
 const User = require("../models/userModel");
 const api = supertest(app);
+const jwt = require("jsonwebtoken");
 
 
 /**
@@ -18,13 +19,15 @@ const api = supertest(app);
 const initialBlogs = require("./blogList").blogs;
 const initialUsers = require("./userList").users;
 const mergedList = initialBlogs.map(blog => {
-    const randomIndex = Math.floor(Math.random() * initialUsers.length);
-    blog.user = initialUsers[randomIndex];
+    blog.user = initialUsers[0];
     return blog;
 });
+let AUTHORIZATION_KEY;
+let ADMIN_ID;
 
 // Runs before each test: https://jestjs.io/es-ES/docs/api#beforeeachfn-tiempo
 beforeEach(async () => {
+    // Create blogs and users for testing
     await Blog.deleteMany({});
     await User.deleteMany({});
 
@@ -32,14 +35,22 @@ beforeEach(async () => {
     let userPromiseArray = userObjects.map(user => user.save());
     await Promise.all(userPromiseArray);
 
-    
-    const adminUserId = userObjects[0].id;
+    let ADMIN_ID = userObjects[0].id;
+
     let blogObjects = mergedList.map(blog => {
-        blog.user = adminUserId;
+        blog.user = ADMIN_ID;
         return new Blog(blog);
     });
     let BlogPromiseArray = blogObjects.map(blog => blog.save());
     await Promise.all(BlogPromiseArray);
+
+    // Set authorization key
+    const dataForJsonToken = {
+        username: userObjects[0].username,
+        id: ADMIN_ID
+    };
+    AUTHORIZATION_KEY = jwt.sign(dataForJsonToken, process.env.SECRET);
+
 });
 
 describe("Testing adding and retrieving blogs", () => {
@@ -57,7 +68,7 @@ describe("Testing adding and retrieving blogs", () => {
         expect(response.body).toHaveLength(initialBlogs.length);
     });
     
-    test("A specific note is within the returned blogs", async () => {
+    test("A specific blog is within the returned blogs", async () => {
         const response = await api.get("/api/blogs");
         const contents = response.body.map(thisBlog => thisBlog.title);
         expect(contents).toContain(initialBlogs[2].title);
@@ -65,19 +76,17 @@ describe("Testing adding and retrieving blogs", () => {
     
     test("A valid blog can be added", async () => {
 
-        const adminUserId = await User.findOne({ username: "admin" }).id;
-
         const newBlog = {
             title: "Iagovar Blog",
             author: "Iago Var",
             url: "https://iagovar.com/",
             likes: 7,
-            user: adminUserId
+            user: ADMIN_ID
         };
-    
 
         await api
             .post("/api/blogs")
+            .set("Authorization", `Bearer ${AUTHORIZATION_KEY}`)
             .send(newBlog)
             .expect(201)
             .expect("Content-Type", /application\/json/);
@@ -88,16 +97,33 @@ describe("Testing adding and retrieving blogs", () => {
         expect(response.body).toHaveLength(initialBlogs.length + 1);
         expect(contents).toContain(newBlog.title);
     });
+
+    test("Blog without auth token is not added", async () => {
+        const newBlog = {
+            title: "Iagovar Blog 2",
+            author: "Iago Var 2",
+            url: "https://iagovar.com/",
+            likes: 7,
+            user: ADMIN_ID
+        };
+
+        await api
+            .post("/api/blogs")
+            .send(newBlog)
+            .expect(401)
+            .expect("Content-Type", /application\/json/);
+    });
     
     test("Blog without URL is not added", async () => {
         const newBlog = {
             author: "Iago Var 2",
             likes: 7,
-            user: initialUsers[0].id
+            user: ADMIN_ID
         };
     
         await api
             .post("/api/blogs")
+            .set("Authorization", `Bearer ${AUTHORIZATION_KEY}`)
             .send(newBlog)
             .expect(400)
             .expect("Content-Type", /application\/json/);
@@ -111,11 +137,12 @@ describe("Testing adding and retrieving blogs", () => {
             title: "No likes blog",
             author: "Iago Var",
             url: "https://iagovar.com/",
-            user: initialUsers[0].id
+            user: ADMIN_ID
         };
     
         await api
             .post("/api/blogs")
+            .set("Authorization", `Bearer ${AUTHORIZATION_KEY}`)
             .send(newBlog)
             .expect(201)
             .expect("Content-Type", /application\/json/);
@@ -151,20 +178,24 @@ describe("Testing adding and retrieving blogs", () => {
             }
         ];
     
-        await api.post("/api/blogs").send(newBlogs[0]).expect(400); // No title
-        await api.post("/api/blogs").send(newBlogs[1]).expect(400); // No url
-        await api.post("/api/blogs").send(newBlogs[2]).expect(201); // No likes, should be fine
+        await api.post("/api/blogs").set("Authorization", `Bearer ${AUTHORIZATION_KEY}`).send(newBlogs[0]).expect(400); // No title
+        await api.post("/api/blogs").set("Authorization", `Bearer ${AUTHORIZATION_KEY}`).send(newBlogs[1]).expect(400); // No url
+        await api.post("/api/blogs").set("Authorization", `Bearer ${AUTHORIZATION_KEY}`).send(newBlogs[2]).expect(201); // No likes, should be fine
     
     });
 });
 
 describe("Testing deleting and updating blogs", () => {
     test("Succeeds with status code 204 if id is valid", async () => {
-        await api.delete(`/api/blogs/${initialBlogs[0]._id}`).expect(204);
+        await api.delete(`/api/blogs/${initialBlogs[0]._id}`)
+            .set("Authorization", `Bearer ${AUTHORIZATION_KEY}`)
+            .expect(204);
     });
 
     test("Fails with status code 400 if id is invalid", async () => {
-        await api.delete("/api/blogs/123456789").expect(400);
+        await api.delete("/api/blogs/123456789")
+            .set("Authorization", `Bearer ${AUTHORIZATION_KEY}`)
+            .expect(400);
     });
 
     test("Updating a valid blog suceeds", async () => {
@@ -172,6 +203,7 @@ describe("Testing deleting and updating blogs", () => {
         blog.likes += 1;
         await api
             .post(`/api/blogs/${blog._id}`)
+            .set("Authorization", `Bearer ${AUTHORIZATION_KEY}`)
             .send(blog)
             .expect(200)
             .expect("Content-Type", /application\/json/);
@@ -182,6 +214,7 @@ describe("Testing deleting and updating blogs", () => {
         blog.likes = "invalid, it has to be a number";
         await api
             .post(`/api/blogs/${blog._id}`)
+            .set("Authorization", `Bearer ${AUTHORIZATION_KEY}`)
             .send(blog)
             .expect(400)
             .expect("Content-Type", /application\/json/);
