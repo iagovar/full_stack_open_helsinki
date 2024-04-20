@@ -5,8 +5,9 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
-const logger = require("./utils/logger");
+const logger = require("./utils/middleware/logger");
 const config = require("./utils/config");
+const tokenAndUserExtractor = require("./utils/middleware/tokenAndUserExtractor");
 
 /**
  * Load local middleware
@@ -15,6 +16,7 @@ const config = require("./utils/config");
 // Router
 const blogsRouter = require("./controllers/blogsRouter");
 const usersRouter = require("./controllers/usersRouter");
+const loginRouter = require("./controllers/loginRouter");
 
 /**
  * Initialize app & set up middleware
@@ -38,7 +40,8 @@ app.use(cors());
 app.use(express.static("view"));
 app.use(express.json());
 app.use(usersRouter);
-app.use(blogsRouter);
+app.use(tokenAndUserExtractor, blogsRouter);
+app.use(loginRouter);
 
 
 module.exports = app;

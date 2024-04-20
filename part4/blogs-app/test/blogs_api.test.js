@@ -75,7 +75,6 @@ describe("Testing adding and retrieving blogs", () => {
             user: adminUserId
         };
     
-        console.log(userObjects);
 
         await api
             .post("/api/blogs")
