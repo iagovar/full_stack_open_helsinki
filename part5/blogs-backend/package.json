@@ -1,0 +1,49 @@
+{
+  "name": "blog-repository",
+  "version": "1.0.0",
+  "description": "Blog repository for FSO",
+  "main": "index.js",
+  "scripts": {
+    "startBackendBlogsPart5": "NODE_ENV=production node index.js",
+    "devBackendBlogsPart5": "NODE_ENV=development nodemon index.js",
+    "lintBackendBlogsPart5": "npx eslint . ",
+    "testBackendBlogsPart5": "NODE_ENV=test jest --verbose  --runInBand"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/iagovar/full_stack_open_helsinki.git"
+  },
+  "keywords": [
+    "blog",
+    "full",
+    "stack",
+    "open",
+    "helsinki"
+  ],
+  "author": "iagovar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/iagovar/full_stack_open_helsinki/issues"
+  },
+  "homepage": "https://github.com/iagovar/full_stack_open_helsinki#readme",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.0",
+    "supertest": "^6.3.4"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.2.3"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}
