@@ -3,6 +3,8 @@ const UserModel = require("../models/userModel");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+const checkTokenExpiration = require("../utils/checkTokenExpiration");
+
 
 loginRouter.post("/api/login", async (request, response) => {
     try {
@@ -27,6 +29,32 @@ loginRouter.post("/api/login", async (request, response) => {
         const token = jwt.sign(dataForJsonToken, process.env.SECRET);
 
         response.status(200).json({ token, username: user.username, name: user.name });
+
+    } catch (error) {
+        response.status(400).json({ error: error.message });
+    }
+});
+
+loginRouter.post("/api/validatetoken", async (request, response) => {
+    try {
+        // Ectract token from header
+        const authorization = request.get("authorization");
+        if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
+            request.token =  String(authorization).replace("Bearer ", "");
+        } else {
+            return response.status(401).json({ error: "invalid token" });
+        }
+
+        // Extract issued
+        const verifiedToken = jwt.verify(request.token, process.env.SECRET);
+
+        // Check if token has expired
+        const isTokenExpired = checkTokenExpiration(verifiedToken.iat, 24);
+        if (isTokenExpired) {
+            response.status(401).json({ error: "token expired" });
+        } else {
+            response.status(200).json({ message: "valid token" });
+        }
 
     } catch (error) {
         response.status(400).json({ error: error.message });

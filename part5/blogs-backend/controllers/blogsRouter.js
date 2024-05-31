@@ -1,29 +1,7 @@
 const blogsRouter = require("express").Router();
 const Blog = require("../models/blogModel");
 const User = require("../models/userModel");
-const jwt = require("jsonwebtoken");
 
-// Some token utils
-/*
-function getTokenFrom(request) {
-    // Defined as middleware in utils, this is just legacy code
-    const authorization = request.get("authorization");
-    if (authorization && authorization.toLowerCase().startsWith("bearer ")) {
-        return String(authorization).replace("Bearer ", "");
-    }
-
-    return undefined;
-}
-
-function getUserFromToken(token) {
-    // Defined as middleware in utils, this is just legacy code
-    const decodedToken = jwt.verify(token, process.env.SECRET);
-    if (!decodedToken.id) {
-        return undefined;
-    }
-    return decodedToken.id;
-}
-*/
 
 blogsRouter.get("/", (request, response) => {
     response.send("Server Running");

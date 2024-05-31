@@ -1,5 +1,15 @@
 const jwt = require("jsonwebtoken");
+const checkTokenExpiration = require("../checkTokenExpiration");
 
+/**
+ * Extracts the token from the request header and verifies it. If the token is valid, it extracts the user and token issued date.
+ * It also checks if the token has expired (24 hours).
+ *
+ * @param {Object} request - The request object.
+ * @param {Object} response - The response object.
+ * @param {Function} next - The next middleware function.
+ * @return {void}
+ */
 function tokenAndUserExtractor(request, response, next) {
     // Extract token from header
     try {
@@ -10,27 +20,28 @@ function tokenAndUserExtractor(request, response, next) {
             request.token = undefined;
         }
     
-        // Extract user
+        // Extract user, issued
+        // If token is required, just check !request.user in the corresponding routes
         if (request.token) {
-            request.user = jwt.verify(request.token, process.env.SECRET).id;
+            const verifiedToken = jwt.verify(request.token, process.env.SECRET);
+            request.user = verifiedToken.id;
+            request.tokenIssued = verifiedToken.iat;
         }
 
         // Check if token has expired (24 hours)
-        if (request.token.iat) {
-            const tokenIssued = new Date(Number(request.token.iat));
-            tokenIssued.setHours(tokenIssued.getHours() + 24);
-            const isTokenExpired = tokenIssued < Date.now();
+        if (request.token && request.tokenIssued) {
+            const isTokenExpired = checkTokenExpiration(request.tokenIssued, 24);
             if (isTokenExpired) {
-                throw new Error("token expired");
+                request.tokenExpired = true;
+                return response.status(401).json({ error: "token expired" });
+            } else {
+                request.tokenExpired = false;
             }
-
-        } else {
-            throw new Error("invalid token");
         }
 
         next();
     } catch (error) {
-        response.status(401).json({ error: "invalid token" });
+        response.status(401).json(error);
     }
 }
 
