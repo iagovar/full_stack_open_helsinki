@@ -16,7 +16,9 @@ function App() {
       <h1>Blogs App</h1>
       <GetLogin />
       {isLoggedIn && (
-        <ListBlogs />
+        <>
+          <ListBlogs />
+        </>
       )}
     </AuthStateContext.Provider>
   )

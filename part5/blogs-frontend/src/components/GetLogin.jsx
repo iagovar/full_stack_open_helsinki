@@ -106,7 +106,7 @@ export default function GetLogin() {
                     <button onClick={handleLogout}>Logout</button>
                 )}
             </form>
-            {loginError && <p>{loginError}</p>}
+            {loginError && setTimeout(() => setLoginError(undefined), 3000) && <div className="errorMsg">{loginError}</div>}
         </div>
     )    
 }

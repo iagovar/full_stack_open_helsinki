@@ -10,8 +10,8 @@ axiosInstance.interceptors.response.use(
     response => response,
     error => {
         if (error.response && error.response.status === 401) {
-            const { setIsLoggedIn } = useContext(AuthStateContext);
-            setIsLoggedIn(false);
+            //const { setIsLoggedIn } = useContext(AuthStateContext);
+            //setIsLoggedIn(false);
         }
         return Promise.reject(error);
     }
